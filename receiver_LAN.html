@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מרכז עדכונים - חוק חיוך חובה V18 (צפייה גלובלית)</title>
+
+    <style>
+        /* CSS נקי ומעוצב */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #f7f9fc; margin: 0; padding-top: 140px; direction: rtl; }
+        .chat-container { max-width: 800px; margin: auto; padding: 0 15px; }
+
+        .page-header-wrapper { position: fixed; top: 0; right: 0; left: 0; z-index: 1000; background-color: #ffffff; border-bottom: 1px solid #e0e0e0; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); padding: 0 15px; }
+        .page-header { max-width: 800px; margin: auto; display: flex; flex-direction: column; padding: 15px 0 10px; }
+        .page-header .fs-4 { font-size: 1.5rem; margin: 0 0 5px; font-weight: bold; color: #ff0000; }
+        .page-header small { font-size: 0.9em; color: #666; line-height: 1.3; }
+
+        .message-wrapper { position: relative; margin-bottom: 30px; }
+        .floating-avatar { position: absolute; top: 0; right: 0; transform: translate(15px, -10px); width: 40px; height: 40px; border-radius: 50%; background-color: #f0f0f0; border: 2px solid white; color: #cc3333; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); z-index: 20; font-weight: 900; line-height: 1; text-align: center; }
+        .message-box { background-color: #ffffff; border-radius: 6px; padding: 10px 20px 0; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); border: 1px solid #e0e0e0; position: relative; z-index: 10; }
+        .message-top-bar { display: flex; flex-direction: row; gap: 10px; padding-right: 5px; align-items: center; justify-content: flex-end; font-size: 0.85em; color: #888; margin-bottom: 5px; }
+        .message-top-bar strong { color: #6c757d; font-weight: bold; }
+        
+        .message-top-bar button { background: none; border: none; padding: 5px; cursor: pointer; color: #888; line-height: 1; transition: color 0.1s; }
+        .message-top-bar button:hover { color: #3b5998; }
+        .message-top-bar svg { width: 18px; height: 18px; color: inherit; }
+        .message-content-section { padding: 5px 0 15px; }
+        .message-content-section p { margin: 0; line-height: 1.5; color: #333; }
+        .message-content-section p strong { font-weight: 800; color: #333; }
+        
+        .reactions-bar-container { display: flex; align-items: center; justify-content: flex-start; padding: 10px 0; border-top: 1px solid #f0f0f0; gap: 8px; }
+        .emoji-reaction { display: flex; align-items: center; background-color: #fff; border: 1px solid #ddd; border-radius: 15px; padding: 3px 8px; cursor: pointer; box-shadow: 0 1px 1px rgba(0,0,0,0.05); font-size: 0.9em; }
+        .emoji-reaction.reacted-by-user { background-color: #007bff; border-color: #007bff; color: white; }
+        .emoji-reaction .emoji { font-size: 1.2em; margin-inline-end: 5px; }
+        .emoji-reaction.reacted-by-user .count { color: white; }
+        
+        .emoji-picker { position: absolute; top: 100%; right: 15px; margin-top: 5px; background-color: #fff; border: 1px solid #ddd; border-radius: 10px; padding: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); display: none; z-index: 30; }
+        .message-wrapper:hover .emoji-picker { display: flex; }
+        .emoji-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; }
+        .emoji-button { background: none; border: none; cursor: pointer; font-size: 1.2em; padding: 1px; }
+
+        .unread-separator {
+            display: flex; align-items: center; text-align: center; margin: 20px 0;
+            font-size: 0.9em; color: #ff0000; text-transform: uppercase; font-weight: bold;
+        }
+        .unread-separator::before, .unread-separator::after { content: ''; flex: 1; border-bottom: 1px solid #ffc8c8; }
+        .unread-separator:not(:empty)::before { margin-inline-end: 1em; }
+        .unread-separator:not(:empty)::after { margin-inline-start: 1em; }
+        
+        #scrollToBottomBtn {
+            position: fixed; bottom: 20px; left: 20px; z-index: 999; background-color: #007bff;
+            color: white; border: none; border-radius: 50%; width: 45px; height: 45px;
+            font-size: 1.5em; display: none; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); transition: opacity 0.3s;
+        }
+        .report-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .modal-content { background-color: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 400px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); direction: rtl; }
+    </style>
+</head>
+<body>
+
+    <div class="page-header-wrapper">
+        <div class="page-header">
+            <span class="fs-4">חוק חיוך חובה 😄</span>
+            <small> צחוק ברמה - חיוך בנשמה</small>
+        </div>
+    </div>
+
+    <div class="chat-container">
+        <div id="messagesList">
+            <div class="message-wrapper"><div class="message-box">טוען הודעות...</div></div>
+        </div>
+    </div>
+
+    <div id="reportModal" class="report-modal">
+        <div class="modal-content">
+            <h3>דיווח על הודעה</h3>
+            <p id="reportedMessageText" style="font-size: 0.9em; color: #555; border-right: 3px solid #ccc; padding-right: 8px; margin: 10px 0;"></p>
+            <label for="reportReason">סיבת הדיווח (חובה):</label>
+            <textarea id="reportReason" placeholder="נא לפרט את סיבת הדיווח"></textarea>
+            <div class="modal-actions">
+                <button class="cancel-btn" onclick="closeReportModal()">ביטול</button>
+                <button class="submit-btn" onclick="submitReport()">שלח דיווח</button>
+            </div>
+        </div>
+    </div>
+
+    <button id="scrollToBottomBtn" title="קפוץ להודעה האחרונה" onclick="scrollToBottom()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-down"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </button>
+
+    <script>
+        // *** כתובת ה-API הגלובלית המעודכנת! ***
+        const API_BASE_URL = 'http://dhoc97909.pythonanywhere.com';
+        const GET_MESSAGES_URL = API_BASE_URL + '/get_messages';
+        // **********************************
+
+        const USER_REACTIONS_KEY = 'userReactions';
+        const REPORTS_KEY = 'messageReportsV1';
+        const LAST_READ_ID_KEY = 'lastReadMessageId_NUMERIC'; 
+        const LOCAL_REACTIONS_DATA = 'localReactionsData'; 
+
+        const messagesList = document.getElementById('messagesList');
+        const scrollToBottomBtn = document.getElementById('scrollToBottomBtn');
+        const reportModal = document.getElementById('reportModal');
+        const reportedMessageText = document.getElementById('reportedMessageText');
+        const reportReasonTextarea = document.getElementById('reportReason');
+        
+        let currentReportMessageId = null;
+        let currentReportMessageContent = null;
+        let allMessagesCache = [];
+        let LAST_READ_ID = 0; 
+        
+        const ALL_EMOJIS = ['👍', '😊', '🔥', '🚀', '❤️', '🙌', '🎉', '💡', '🤔', '🙏', '💯', '👌', '⭐', '✅', '👑', '🥳', '😎', '🍎', '🍇', '🍞'];
+
+        function getOrCreateUserId() {
+             let userId = localStorage.getItem('uniqueUserId');
+             if (!userId) {
+                 userId = 'user_' + Math.random().toString(36).substring(2, 9);
+                 localStorage.setItem('uniqueUserId', userId);
+             }
+             return userId;
+           }
+           const CURRENT_USER_ID = getOrCreateUserId();
+
+        function updateLastReadId(messageId) {
+             LAST_READ_ID = messageId;
+             localStorage.setItem(LAST_READ_ID_KEY, messageId.toString());
+        }
+
+        function getLastReadId() {
+             const lastRead = localStorage.getItem(LAST_READ_ID_KEY);
+             LAST_READ_ID = lastRead ? parseInt(lastRead, 10) : 0;
+             return LAST_READ_ID;
+        }
+
+        // פונקציות הדיווח והריאקציות (שנשארות מקומיות)
+        function openReportModal(messageId, messageText) {
+             currentReportMessageId = messageId;
+             currentReportMessageContent = messageText;
+             reportedMessageText.textContent = messageText.substring(0, 100) + (messageText.length > 100 ? '...' : '');
+             reportReasonTextarea.value = '';
+             reportModal.style.display = 'flex';
+        }
+
+        function closeReportModal() {
+             reportModal.style.display = 'none';
+             currentReportMessageId = null;
+             currentReportMessageContent = null;
+        }
+
+        function submitReport() {
+             const reason = reportReasonTextarea.value.trim();
+             if (!reason) { alert('חובה להזין סיבת דיווח.'); return; }
+             
+             const newReport = { messageId: currentReportMessageId, messageText: currentReportMessageContent, userId: CURRENT_USER_ID, reason: reason, timestamp: new Date().toLocaleString('he-IL') };
+             const storedData = localStorage.getItem(REPORTS_KEY);
+             let reports = storedData ? JSON.parse(storedData) : [];
+             reports.push(newReport);
+             localStorage.setItem(REPORTS_KEY, JSON.stringify(reports));
+             
+             closeReportModal();
+             alert('הדיווח נשלח בהצלחה (נשמר מקומית עבור המנהל)!');
+        }
+
+        function handleReaction(messageId, emoji) {
+             let allLocalMessages = localStorage.getItem(LOCAL_REACTIONS_DATA);
+             allLocalMessages = allLocalMessages ? JSON.parse(allLocalMessages) : {};
+
+             if (!allLocalMessages[messageId]) {
+                 allLocalMessages[messageId] = { reactions: {}, userReactions: {} };
+             }
+             
+             let messageReactions = allLocalMessages[messageId].reactions;
+             let userReactions = allLocalMessages[messageId].userReactions;
+
+             if (!messageReactions[emoji]) { messageReactions[emoji] = 0; }
+             
+             const hasReacted = userReactions[emoji] === CURRENT_USER_ID;
+
+             if (hasReacted) {
+                 messageReactions[emoji] = Math.max(0, messageReactions[emoji] - 1);
+                 delete userReactions[emoji];
+             } else {
+                 messageReactions[emoji] += 1;
+                 userReactions[emoji] = CURRENT_USER_ID;
+             }
+
+             localStorage.setItem(LOCAL_REACTIONS_DATA, JSON.stringify(allLocalMessages));
+             fetchMessages(false); 
+        }
+
+        function getLocalReactions(messageId) {
+             let allLocalMessages = localStorage.getItem(LOCAL_REACTIONS_DATA);
+             allLocalMessages = allLocalMessages ? JSON.parse(allLocalMessages) : {};
+             return allLocalMessages[messageId] || { reactions: {}, userReactions: {} };
+        }
+
+        // פונקציות מדיה וגלילה (לא השתנו)
+        function createMediaElement(type, url) {
+             const container = document.createElement('div');
+             container.className = 'media-container';
+             container.style.paddingTop = '10px';
+             // ... לוגיקת יצירת תמונות/וידאו ...
+             if (type === 'image') {
+                 const img = document.createElement('img');
+                 img.src = url; img.alt = 'תמונה מצורפת'; img.style.maxWidth = '100%'; img.style.height = 'auto'; img.style.borderRadius = '4px'; container.appendChild(img);
+             } else if (type === 'video') {
+                 const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+                 const match = url.match(youtubeRegex);
+                 if (match && match[1]) {
+                     const videoId = match[1];
+                     const iframe = document.createElement('iframe');
+                     iframe.src = `https://www.youtube.com/embed/${videoId}`;
+                     iframe.frameBorder = '0';
+                     iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+                     iframe.allowFullscreen = true;
+                     iframe.style.width = '100%'; iframe.style.height = '315px'; container.appendChild(iframe);
+                 } else {
+                     const video = document.createElement('video');
+                     video.src = url; video.controls = true; video.autoplay = false; video.preload = 'metadata'; video.style.width = '100%'; container.appendChild(video);
+                 }
+             }
+             return container;
+        }
+
+        function scrollToBottom() {
+             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+             updateReadStatusIfNearBottom(true);
+        }
+
+        function updateReadStatusIfNearBottom(forceUpdate = false) {
+             const isNearBottom = (window.innerHeight + window.scrollY) >= (document.body.scrollHeight - 100);
+             const lastMessage = allMessagesCache.length > 0 ? allMessagesCache[allMessagesCache.length - 1] : null;
+
+             if ((isNearBottom || forceUpdate) && lastMessage) {
+                 const lastIdNumeric = parseInt(lastMessage.id, 10);
+                 if (lastIdNumeric > LAST_READ_ID) {
+                      updateLastReadId(lastIdNumeric);
+                 }
+
+                 if (isNearBottom) {
+                      fetchMessages(false); // רענון להסרת קו ההפרדה
+                 }
+             }
+        }
+
+        function handleScroll() {
+             updateReadStatusIfNearBottom(false);
+             const isNearBottom = (window.innerHeight + window.scrollY) >= (document.body.scrollHeight - 100);
+             scrollToBottomBtn.style.display = isNearBottom ? 'none' : 'flex';
+        }
+        
+        function createMessageBox(message) {
+             const { reactions, userReactions } = getLocalReactions(message.id); 
+
+             const wrapper = document.createElement('div');
+             wrapper.className = 'message-wrapper';
+             
+             // Avatar
+             const floatingAvatar = document.createElement('div');
+             floatingAvatar.className = 'floating-avatar';
+             floatingAvatar.textContent = message.sender ? message.sender.charAt(0) : 'ח'; 
+             wrapper.appendChild(floatingAvatar);
+             
+             const box = document.createElement('div');
+             box.className = 'message-box';
+             
+             // Emoji Picker
+             wrapper.appendChild(createEmojiPicker(message.id));
+             
+             // Top Bar
+             const topBar = document.createElement('div');
+             topBar.className = 'message-top-bar';
+             const alertIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" class="eva eva-alert-triangle-outline" fill="currentColor"><g data-name="Layer 2"><g data-name="alert-triangle"><rect width="24" height="24" transform="rotate(90 12 12)" opacity="0"></rect><path d="M22.56 16.3L14.89 3.58a3.43 3.43 0 0 0-5.78 0L1.44 16.3a3 3 0 0 0-.05 3A3.37 3.37 0 0 0 4.33 21h15.34a3.37 3.37 0 0 0 2.94-1.66 3 3 0 0 0-.05-3.04zM20.86 18.35a1.31 1.31 0 0 1-1.19.65H4.33a1.31 1.31 0 0 1-1.19-.65 1 1 0 0 1 0-1l7.68-12.73a1.48 1.48 0 0 1 2.36 0l7.67 12.72a1 1 0 0 1 .01 1.01z"></path><circle cx="12" cy="16" r="1"></circle><path d="M12 8a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0V9a1 1 0 0 0-1-1z"></path></g></g></svg>`;
+             const linkIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" class="eva eva-link-2" fill="currentColor"><g data-name="Layer 2"><g data-name="link-2"><rect width="24" height="24" opacity="0"></rect><path d="M13.29 9.29l-4 4a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l4-4a1 1 0 0 0-1.42-1.42z"></path><path d="M12.28 17.4L11 18.67a4.2 4.2 0 0 1-5.58.4 4 4 0 0 1-.27-5.93l1.42-1.43a1 1 0 0 0 0-1.42 1 1 0 0 0-1.42 0l-1.27 1.28a6.15 6.15 0 0 0-.67 8.07 6.06 6.06 0 0 0 9.07.6l1.42-1.42a1 1 0 0 0-1.42-1.42z"></path><path d="M19.66 3.22a6.18 6.18 0 0 0-8.13.68L10.45 5a1.09 1.09 0 0 0-.17 1.61 1 1 0 0 0 1.42 0L13 5.3a4.17 4.17 0 0 1 5.57-.4 4 4 0 0 1 .27 5.95l-1.42 1.43a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l1.42-1.42a6.06 6.06 0 0 0-.6-9.06z"></path></g></g></svg>`;
+
+             topBar.innerHTML = `
+                 <strong class="text-black-50">${message.sender} 💥</strong>
+                 <small class="text-black-50">${message.timestamp}</small>
+                 <button title="דווח על ההודעה" onclick="openReportModal('${message.id}', \`${message.message.replace(/`/g, '\\`')}\`)">${alertIcon}</button>
+                 <button title="העתק קישור להודעה">${linkIcon}</button>
+             `;
+             box.appendChild(topBar);
+
+             // Content Section
+             const contentSection = document.createElement('div');
+             contentSection.className = 'message-content-section';
+             const p = document.createElement('p');
+             p.innerHTML = message.message.replace(/\|/g, '<span style="font-weight: normal;">|</span>').replace(/(.*)(<span style="font-weight: normal;">\|<\/span>)/, '<strong>$1</strong>$2');
+             contentSection.appendChild(p);
+             box.appendChild(contentSection);
+             
+             // Media (אם קיים)
+             if (message.type !== 'text' && message.mediaUrl) { box.appendChild(createMediaElement(message.type, message.mediaUrl)); }
+
+             // Reactions Bar
+             const reactionsContainer = document.createElement('div');
+             reactionsContainer.className = 'reactions-bar-container';
+             let hasReactions = false;
+             for (const [emoji, count] of Object.entries(reactions)) {
+                 if (count > 0) {
+                     hasReactions = true;
+                     const isReacted = userReactions[emoji] === CURRENT_USER_ID;
+                     const btn = document.createElement('div');
+                     btn.className = 'emoji-reaction' + (isReacted ? ' reacted-by-user' : '');
+                     btn.title = `${count} אנשים הגיבו עם ${emoji}`;
+                     btn.innerHTML = `<span class="emoji">${emoji}</span><span class="count">${count}</span>`;
+                     btn.onclick = () => handleReaction(message.id, emoji);
+                     reactionsContainer.appendChild(btn);
+                 }
+             }
+             if (hasReactions) { box.appendChild(reactionsContainer); }
+             
+             wrapper.appendChild(box);
+             return wrapper;
+        }
+
+        function createEmojiPicker(messageId) {
+             const picker = document.createElement('div');
+             picker.className = 'emoji-picker';
+             const grid = document.createElement('div');
+             grid.className = 'emoji-grid';
+             ALL_EMOJIS.forEach(emoji => {
+                 const btn = document.createElement('button');
+                 btn.className = 'emoji-button';
+                 btn.textContent = emoji;
+                 btn.onclick = (e) => { e.stopPropagation(); handleReaction(messageId, emoji); };
+                 grid.appendChild(btn);
+             });
+             picker.appendChild(grid);
+             return picker;
+        }
+
+        // --- פונקציית טעינת ההודעות הגלובלית ---
+        function fetchMessages(scrollToBottomFlag = true) {
+            
+            fetch(GET_MESSAGES_URL)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(messages => {
+                    displayMessages(messages, scrollToBottomFlag);
+                })
+                .catch(error => {
+                    console.error('Error fetching messages:', error);
+                    messagesList.innerHTML = `<div class="message-wrapper"><div class="message-box" style="border-right: 5px solid red;">
+                        <span style="font-weight: bold; color: red;">שגיאה קריטית בטעינה:</span> ודא שהשרת (${API_BASE_URL}) עובד.
+                    </div></div>`;
+                });
+        }
+
+        function displayMessages(messages, scrollToBottomFlag) {
+            getLastReadId(); 
+            messagesList.innerHTML = '';
+            allMessagesCache = messages; 
+            let isUnreadSeparatorAdded = false;
+
+            if (messages.length === 0) {
+                messagesList.innerHTML = '<div class="message-wrapper"><div class="message-box">לוח העדכונים ריק.</div></div>';
+                if (scrollToBottomFlag) { window.scrollTo(0, 0); }
+                return;
+            }
+
+            messages.forEach(message => {
+                 if (!message.id) {
+                     message.id = Date.parse(message.timestamp).toString() + messages.indexOf(message);
+                 }
+                 const currentMessageIdNumeric = parseInt(message.id, 10); 
+
+                if (!isUnreadSeparatorAdded && currentMessageIdNumeric > LAST_READ_ID) {
+                    const separator = document.createElement('div');
+                    separator.className = 'unread-separator';
+                    separator.textContent = '▼ הודעות חדשות ▼';
+                    messagesList.appendChild(separator);
+                    isUnreadSeparatorAdded = true;
+                }
+
+                const messageElement = createMessageBox(message);
+                messagesList.appendChild(messageElement);
+            });
+
+            if (scrollToBottomFlag) {
+                setTimeout(() => {
+                    scrollToBottom();
+                }, 50);
+            }
+        }
+
+
+        // --- אתחול והקשבה לאירועים ---
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchMessages(true);
+            window.addEventListener('scroll', handleScroll);
+        });
+
+        // רענון אוטומטי כל 10 שניות
+        setInterval(() => fetchMessages(false), 10000); 
+
+    </script>
+</body>
+</html>
