@@ -1,1 +1,1662 @@
-----
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מערכת ניהול - גלובלי (V3)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+   <link rel="icon" href="https://github.com/i0527685490-source/-----/blob/main/%D7%9C%D7%95%D7%92%D7%95-removebg-preview.png?raw=true" sizes="96x96">
+    <link rel="shortcut icon" href="https://github.com/i0527685490-source/-----/blob/main/%D7%9C%D7%95%D7%92%D7%95-removebg-preview.png?raw=true">
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <style>
+        /* סגנון בסיסי */
+        :root {
+            --primary-color: #3f51b5;
+            --primary-hover: #303f9f;
+            --secondary-color: #ff9800;
+            --background-color: #e8eaf6;
+            --card-background: #ffffff;
+            --text-color: #212121;
+            --border-radius: 8px;
+            --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.08);
+            --shadow-medium: 0 8px 25px rgba(0, 0, 0, 0.15);
+            --success-color: #4caf50;
+            --error-color: #f44336;
+            --delete-bg: #ffebee;
+            --delete-color: #c62828;
+            --report-bg: #fffde7;
+            --report-message-bg: #f5f5f5;
+            --colored-text: var(--error-color); /* הגדרת משתנה לצבע טקסט בצ'אט/גלובלי */
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            direction: rtl;
+            text-align: right;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* מסך כניסה */
+        #loginScreen {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background-color: var(--background-color);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        #loginForm {
+            background-color: var(--card-background);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-medium);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        #loginForm h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        /* סרגל צדדי (תפריט טאבים) */
+        .sidebar {
+            width: 250px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 10px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar h1 {
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+        }
+
+        .tab-button {
+            background-color: transparent;
+            color: white;
+            border: none;
+            text-align: right;
+            padding: 15px 20px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: var(--border-radius);
+            transition: background-color 0.3s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .tab-button i {
+            margin-left: 10px;
+            font-size: 1.1rem;
+        }
+
+        .tab-button:hover:not(.active) {
+            background-color: var(--primary-hover);
+        }
+
+        .tab-button.active {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            font-weight: 700;
+        }
+
+        .tab-button .badge {
+            background-color: var(--error-color);
+            color: white;
+            border-radius: 50%;
+            padding: 2px 8px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-right: auto;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        /* תוכן ראשי */
+        .main-content {
+            flex-grow: 1;
+            padding: 3px;
+        }
+
+        .tab-content {
+            background-color: var(--card-background);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-medium);
+            margin-bottom: 20px;
+        }
+
+        .tab-content h2 {
+            color: var(--primary-color);
+            margin-top: 0;
+            border-bottom: 2px solid var(--background-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .tab-content h2 i {
+            margin-left: 10px;
+            font-size: 1.3rem;
+        }
+
+        /* טפסים וכפתורים */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"], input[type="number"], textarea, select, input[type="url"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: var(--border-radius);
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+        }
+
+        /* סגנון מיוחד לשדה קריאה בלבד בטופס הגלובלי */
+        input[readonly] {
+            background-color: #f5f5f5;
+            color: #757575;
+            border-style: dashed;
+        }
+
+        button.action-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+
+        button.action-button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .delete-button {
+            background-color: var(--delete-bg);
+            color: var(--delete-color);
+            border: 1px solid var(--delete-color);
+            padding: 8px 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .delete-button:hover {
+            background-color: var(--delete-color);
+            color: white;
+        }
+
+        /* כפתור רענון הודעות גלובליות */
+        .refresh-messages-button {
+            background-color: #90a4ae;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .refresh-messages-button:hover {
+            background-color: #607d8b;
+        }
+
+
+        /* הודעות תגובה */
+        #responseMessage {
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            display: none; /* התחל מוסתר */
+            border: 1px solid;
+        }
+
+        .success {
+            background-color: #e8f5e9; /* Light green */
+            color: var(--success-color);
+            border-color: var(--success-color);
+        }
+
+        .error {
+            background-color: #ffebee; /* Light red */
+            color: var(--error-color);
+            border-color: var(--error-color);
+        }
+
+        /* סגנון לניהול דיווחים */
+        .reports-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 15px;
+        }
+
+        .reports-controls button {
+            padding: 10px 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .clear-all-button {
+            background-color: var(--error-color);
+            color: white;
+            border: none;
+        }
+
+        .clear-all-button:hover {
+            background-color: #b71c1c;
+        }
+
+        .refresh-button {
+            background-color: #90a4ae;
+            color: white;
+            border: none;
+        }
+
+        .refresh-button:hover {
+            background-color: #607d8b;
+        }
+
+        .report-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .report-item {
+            background-color: var(--report-bg);
+            border: 1px solid #f9e1e1;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .report-id {
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .report-timestamp {
+            color: #757575;
+        }
+
+        /* סקשן חדש להודעה המדווחת */
+        .reported-message-details {
+            background-color: var(--report-message-bg);
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: var(--border-radius);
+            margin-top: 10px;
+        }
+
+        .reported-message-details strong {
+            color: var(--primary-hover);
+        }
+
+        .report-content span {
+            font-weight: 400;
+            color: #424242;
+        }
+
+        .report-actions {
+            margin-top: 10px;
+            border-top: 1px dashed #ccc;
+            padding-top: 10px;
+        }
+
+        .report-actions .delete-button {
+            float: left; /* יישור לשמאל */
+        }
+
+        .no-data {
+            text-align: center;
+            color: #757575;
+            padding: 20px;
+            border: 1px dashed #ccc;
+            border-radius: var(--border-radius);
+            margin-top: 10px;
+        }
+
+        /* --- צ'אט מנהלים - סגנון מעודכן --- */
+        #adminChatFeed {
+            max-height: 320px; /* הגדלת גובה כדי לראות יותר הודעות */
+            overflow-y: auto;
+            padding: 15px;
+            border: 1px solid var(--background-color);
+            border-radius: var(--border-radius);
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column-reverse; /* כדי שההודעה החדשה תופיע למטה */
+        }
+
+        .chat-message-container { /* מכולה חדשה להודעה + כותרת */
+            max-width: 80%;
+            margin-bottom: 2px; /* מרווח קטן מאוד */
+            padding-top: 5px; /* מרווח קטן מההודעה הקודמת */
+            align-self: flex-end; /* ברירת מחדל: יישור לימין (הודעה נכנסת) */
+        }
+
+        .chat-message-container.self {
+            align-self: flex-start; /* יישור לשמאל (הודעה יוצאת - מודגשת) */
+        }
+
+        .chat-header { /* כותרת קטנה מעל ההודעה */
+            font-size: 0.75rem;
+            color: #757575;
+            margin-bottom: 2px;
+            padding: 0 5px;
+            text-align: right;
+        }
+
+        .chat-header.self {
+            text-align: left;
+        }
+
+        .chat-header strong {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-left: 5px;
+        }
+
+        .chat-message-bubble { /* בועת ההודעה עצמה */
+            padding: 8px 12px;
+            border-radius: 18px 18px 18px 4px; /* פינה חדה בפינה ימין-למטה */
+            word-wrap: break-word;
+            line-height: 1.4;
+            background-color: #f1f1f1;
+            margin: 0;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            display: block;
+        }
+
+        /* סגנון להודעה שנשלחה על ידי המשתמש המקומי */
+        .chat-message-container.self .chat-message-bubble {
+            background-color: #e3f2fd; /* צבע בהיר יותר להדגשה */
+            border-radius: 18px 18px 4px 18px; /* פינה חדה בפינה שמאל-למטה */
+        }
+
+        /* סגנון לאלמנט הצבעוני בתוך הבועה */
+        .chat-message-bubble .colored-text {
+            color: var(--colored-text);
+            font-weight: 700;
+        }
+
+        /* הסרת הסגנונות הפנימיים הישנים שהיו בתוך הבועה */
+        .chat-user, .chat-timestamp {
+            display: none !important;
+        }
+
+        /* --- סגנון טופס שליחה כללי (צ'אט מנהלים + הודעה גלובלית) --- */
+        .text-editor-controls {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 10px;
+            padding: 5px 0;
+        }
+
+        .text-editor-controls .bold-button, .text-editor-controls .color-button {
+            padding: 8px 12px;
+            flex-shrink: 0;
+            border: none;
+            font-weight: 700;
+            font-size: 1rem;
+            line-height: 1;
+            height: 38px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .text-editor-controls .bold-button {
+            background-color: #e0e0e0;
+            color: var(--primary-color);
+        }
+
+        .text-editor-controls .bold-button:hover {
+            background-color: #ccc;
+        }
+
+        .text-editor-controls .color-button {
+            background-color: #fce4ec; /* Light pink background */
+            color: var(--delete-color); /* Dark red text */
+        }
+
+        .text-editor-controls .color-button:hover {
+            background-color: #f8bbd0;
+        }
+
+        /* --- סגנון ספציפי לטופס הודעה גלובלית --- */
+        #globalMessageForm .form-group textarea {
+            min-height: 80px; /* גובה גדול יותר עבור הודעה גלובלית */
+            text-align: right;
+        }
+
+        /* --- סגנון ספציפי לטופס צ'אט מנהלים --- */
+        #adminChatForm {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 10px;
+            border-top: 1px solid #eee;
+            background-color: #f7f7f7;
+            border-radius: var(--border-radius);
+        }
+
+        #adminChatForm .input-area {
+            margin-bottom: 0;
+            flex-grow: 1;
+        }
+
+        #adminChatForm label {
+            display: none;
+        }
+
+        #adminChatForm textarea#chatText {
+            resize: none;
+            height: 20px; /* גובה קבוע של שורה אחת */
+            min-height: 20px;
+            padding: 15px 10px;
+            line-height: 1.2;
+            overflow-y: hidden;
+            border: 1px solid #ddd;
+            text-align: right;
+        }
+
+        #adminChatForm .action-button { /* כפתור שלח בצ'אט */
+            padding: 8px 12px;
+            margin-top: 0;
+            flex-shrink: 0;
+            height: 38px; /* גובה זהה ל-textarea */
+            border-radius: var(--border-radius);
+        }
+
+        #adminChatForm .text-editor-controls {
+            margin-bottom: 0;
+            padding: 0;
+            /* הסתרת הכפתורים כאשר הם משולבים ב-flex של הטופס הראשי */
+            display: none;
+        }
+        /* הצגת כפתורי העריכה בצ'אט בנפרד מחוץ לטקסט אריה */
+        #adminChatForm > .bold-button, #adminChatForm > .color-button {
+             display: block;
+             height: 38px;
+             margin-top: 0;
+        }
+        /* --- סוף צ'אט מנהלים - סגנון מעודכן --- */
+
+        /* רשימת הודעות גלובליות למחיקה */
+        .global-messages-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .message-item {
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .message-details {
+            flex-grow: 1;
+        }
+
+        .message-details strong {
+            display: block;
+            font-size: 1.1rem;
+            color: var(--primary-hover);
+        }
+
+        .message-details small {
+            color: #757575;
+            display: block;
+            margin-top: 5px;
+            word-break: break-all;
+        }
+
+        .message-details p {
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .message-item .delete-button {
+            flex-shrink: 0;
+            margin-right: 15px;
+            align-self: center;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="loginScreen" style="display:flex;">
+        <div id="loginForm">
+            <h2>כניסה למערכת הניהול</h2>
+
+            <p><strong>שלב 1:</strong> התחבר באמצעות גוגל</p>
+            <div id="google-sign-in-button" style="margin-bottom: 20px; display: flex; justify-content: center;">
+                </div>
+
+            <p style="margin-top: 20px;"><strong>שלב 2:</strong> שם המשתמש שלך (יוגדר כשם ברירת המחדל)</p>
+            <div class="form-group">
+                <input type="text" id="adminUsername" placeholder="הכנס שם משתמש (שיישמר)" required>
+            </div>
+
+            <button class="action-button" onclick="submitUsername()" id="submitUsernameButton" disabled>
+                <i class="fas fa-sign-in-alt"></i> כניסה לפאנל הניהול
+            </button>
+            <p id="loginMessage" class="error" style="display:none; margin-top: 10px;"></p>
+        </div>
+    </div>
+
+    <div id="adminPanelWrapper" style="display:none; width: 100%; height: 100%; display: flex;">
+        <div class="sidebar">
+            <h1>מערכת ניהול</h1>
+
+            <button class="tab-button" onclick="openTab(event, 'adminSettings')">
+                <i class="fas fa-user-shield"></i> מנהל
+            </button>
+
+            <button class="tab-button active" onclick="openTab(event, 'globalMessage')">
+                <i class="fas fa-bullhorn"></i> פרסום הודעה גלובלית
+            </button>
+            <button class="tab-button" onclick="openTab(event, 'reports')">
+                <i class="fas fa-flag"></i> ניהול דיווחים (<span id="reportsCount">0</span>)
+            </button>
+            <button class="tab-button" onclick="openTab(event, 'adminChat')">
+                <i class="fas fa-comments"></i> צ'אט מנהלים <span id="adminChatBadge" class="badge" style="display:none;">0</span>
+            </button>
+            <button class="tab-button" onclick="openTab(event, 'botControl')">
+                <i class="fas fa-robot"></i> בוט
+            </button>
+            <button class="tab-button" onclick="openTab(event, 'messageManagement')">
+                <i class="fas fa-envelope"></i> ניהול הודעות
+            </button>
+            <button class="tab-button" onclick="openTab(event, 'stats')">
+                <i class="fas fa-chart-line"></i> סטטיסטיקות
+            </button>
+        </div>
+
+        <div class="main-content">
+            <div id="responseMessage" class="success"></div>
+
+            <div id="adminSettings" class="tab-content" style="display:none">
+                <h2><i class="fas fa-user-shield"></i> הגדרות מנהל</h2>
+                <form id="adminSettingsForm">
+                    <div class="form-group">
+                        <label for="adminUsernameSetting">שם משתמש (יופיע בצ'אט/גלובלי):</label>
+                        <input type="text" id="adminUsernameSetting" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="adminProfileImageUrl">כתובת URL לתמונת פרופיל (לדוגמה: https://example.com/image.png):</label>
+                        <input type="url" id="adminProfileImageUrl" placeholder="אופציונלי - שמור ריק אם אין">
+                        <small style="color: #757575;">תמונה זו תופיע ליד ההודעות שלך בצ'אט המנהלים ובהודעות גלובליות.</small>
+                    </div>
+                    <button type="submit" class="action-button"><i class="fas fa-save"></i> שמור הגדרות</button>
+                    <p id="adminSettingsStatus" class="success" style="display:none; margin-top: 10px;"></p>
+                </form>
+                <h3 style="margin-top: 30px; border-bottom: 1px solid #eee; padding-bottom: 10px;">פרטי חשבון</h3>
+                <p><strong>אימייל מאומת:</strong> <span id="authenticatedEmailDisplay">...</span></p>
+            </div>
+
+            <div id="globalMessage" class="tab-content" style="display:block">
+                <h2><i class="fas fa-bullhorn"></i> פרסום הודעה גלובלית</h2>
+                <form id="globalMessageForm" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="username">שם משתמש:</label>
+                        <input type="text" id="username" name="username" value="חוק חיוך חובה" readonly required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="text">תוכן ההודעה:</label>
+                        <div class="text-editor-controls">
+                            <button type="button" class="bold-button" onclick="wrapSelectionWithTag('b', 'globalText')">B</button>
+                            <button type="button" class="color-button" onclick="wrapSelectionWithTag('color', 'globalText')">C</button>
+                        </div>
+                        <textarea id="globalText" name="text" rows="4" placeholder="תוכן ההודעה המפורט..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="mediaType">סוג מדיה:</label>
+                        <select id="mediaType" onchange="toggleMediaInput()">
+                            <option value="none">ללא מדיה</option>
+                            <option value="file">העלאת קובץ (תמונה/וידאו)</option>
+                        </select>
+                    </div>
+
+                    <div id="fileUploadGroup" class="form-group" style="display:none;">
+                        <label for="file">קובץ מדיה (עד 10MB):</label>
+                        <input type="file" id="file" name="file" accept="image/*,video/*">
+                    </div>
+
+                    <button type="submit" class="action-button"><i class="fas fa-paper-plane"></i> פרסם הודעה</button>
+                </form>
+            </div>
+
+            <div id="reports" class="tab-content" style="display:none">
+                <h2><i class="fas fa-flag"></i> ניהול דיווחים (<span id="reportsCount">0</span>)</h2>
+                <div class="reports-controls">
+                    <button onclick="clearAllReports()" class="clear-all-button"><i class="fas fa-skull-crossbones"></i> נקה את כל הדיווחים מהשרת</button>
+                    <button onclick="loadReports()" class="refresh-button"><i class="fas fa-sync-alt"></i> רענן דיווחים מהשרת</button>
+                </div>
+                <div id="reportsList" class="report-feed">
+                    <p class="no-data">לחץ על 'רענן דיווחים מהשרת' כדי לטעון נתונים.</p>
+                </div>
+            </div>
+
+            <div id="adminChat" class="tab-content" style="display:none">
+                <h2><i class="fas fa-comments"></i> צ'אט מנהלים</h2>
+                <div id="adminChatFeed" class="chat-feed">
+                    <p class="no-data">טוען הודעות צ'אט...</p>
+                </div>
+                <form id="adminChatForm">
+                    <button type="button" class="bold-button" onclick="wrapSelectionWithTag('b', 'chatText')">B</button>
+                    <button type="button" class="color-button" onclick="wrapSelectionWithTag('color', 'chatText')">C</button>
+                    <div class="form-group input-area">
+                        <label for="chatText">שלח הודעה:</label>
+                        <textarea id="chatText" name="text" rows="1" placeholder="הקלד את ההודעה שלך כאן..." required></textarea>
+                    </div>
+                    <button type="submit" class="action-button" title="שלח הודעה">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+
+            <div id="botControl" class="tab-content" style="display:none">
+                <h2><i class="fas fa-robot"></i> בקרת בוט</h2>
+                <form id="botUploadForm" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="botFiles">העלאת תמונות (עד 100 קבצים):</label>
+                        <input type="file" id="botFiles" name="botFiles" accept="image/*" multiple required>
+                        <small style="color: #757575;">ניתן לבחור עד 100 קבצים. העלאה לא תחליף תמונות קיימות, אלא תוסיף לרשימת התמונות שהבוט ישלח.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="sendInterval">מרווח שליחה (בדקות):</label>
+                        <input type="number" id="sendInterval" name="sendInterval" min="1" value="5" required>
+                    </div>
+                    <button type="submit" class="action-button"><i class="fas fa-upload"></i> העלה תמונות לבוט</button>
+                </form>
+
+                <h3 style="margin-top: 30px; border-bottom: 1px solid #eee; padding-bottom: 10px;">סטטוס ושליטה</h3>
+                <div id="botStatus">
+                    <p><strong>סטטוס נוכחי:</strong> <span id="botCurrentStatus" style="color: var(--secondary-color);">טוען סטטוס...</span></p>
+                    <p><strong>תמונות ממתינות:</strong> <span id="pendingImagesCount">...</span></p>
+                    <p><strong>מרווח שליחה מוגדר:</strong> <span id="currentInterval">...</span></p>
+                </div>
+
+                <div style="margin-top: 15px; display: flex; gap: 10px;">
+                    <button onclick="startBotSending()" class="action-button" id="startBotButton"><i class="fas fa-play"></i> הפעל שליחה</button>
+                    <button onclick="stopBotSending()" class="delete-button" style="margin-top: 10px;" id="stopBotButton"><i class="fas fa-stop"></i> הפסק שליחה</button>
+                    <button onclick="clearBotImages()" class="delete-button" style="margin-top: 10px; background-color: #fce4ec; color: #ad1457; border: 1px solid #ad1457;"><i class="fas fa-trash-alt"></i> נקה את כל התמונות הממתינות</button>
+                </div>
+            </div>
+
+            <div id="messageManagement" class="tab-content" style="display:none">
+                <h2><i class="fas fa-envelope"></i> ניהול הודעות</h2>
+                <iframe src="https://dhoc97909.pythonanywhere.com/meseng#" style="width: 100%; height: 430px; border: none;"></iframe>
+            </div>
+
+            <div id="stats" class="tab-content" style="display:none">
+                <h2><i class="fas fa-chart-line"></i> סטטיסטיקות</h2>
+                <div class="form-group">
+                    <label>מונה משתמשים ייחודיים:</label>
+                    <p style="font-size: 2rem; font-weight: 700; color: var(--secondary-color);" id="uniqueUserCount">...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        const API_URL = '';
+        const REPORTS_LIST = document.getElementById('reportsList');
+        const CHAT_FEED = document.getElementById('adminChatFeed');
+        const UNIQUE_USER_COUNT_P = document.getElementById('uniqueUserCount');
+        const GLOBAL_TEXT_INPUT = document.getElementById('globalText');
+        const USERNAME_INPUT = document.getElementById('username');
+        let globalMessagesCache = [];
+
+        // --- NEW CONSTANTS FOR ADMIN CHAT UNREAD COUNT ---
+        const ADMIN_CHAT_LAST_READ_KEY = 'adminChatLastReadTimestamp';
+        const ADMIN_CHAT_BADGE = document.getElementById('adminChatBadge');
+        // --- END NEW CONSTANTS ---
+
+        // 1. רשימת האימיילים המאושרים (האימיילים המעודכנים)
+        const ALLOWED_EMAILS = [
+            'I0527685490@GMAIL.COM'.toUpperCase(),
+            'JONATHAN@HAMAKOM.OVH'.toUpperCase(),
+            'a0796066070@gmail.com'.toUpperCase(),
+            'Y26@HAMAKOM.OVH'.toUpperCase(),
+            '70809000y@gmail.com'.toUpperCase(),
+            'banana@hamakom.ovh'.toUpperCase(),
+            'aviya5490@gmail.com'.toUpperCase(),
+            'dhoc97909@gmail.com'.toUpperCase(),
+            '70809000y@gmail.com'.toUpperCase(),
+            'a025857036@gmail.com'.toUpperCase()
+        ];
+        // מזהה הלקוח שקיבלת
+        const CLIENT_ID = '426523025549-7c50rkn7cun4vmm2r802u0ij6egjehtg.apps.googleusercontent.com';
+
+        let AUTHENTICATED_EMAIL = null;
+
+        // --- NEW: פונקציית טעינת הגדרות מנהל מ-Local Storage ---
+        function loadAdminSettingsFromLocalStorage() {
+            const storedUsername = localStorage.getItem('adminUsername');
+            // שדה חדש: URL לתמונת פרופיל (ברירת מחדל: ריק)
+            const storedProfileImageUrl = localStorage.getItem('adminProfileImageUrl') || '';
+            const email = localStorage.getItem('adminAuthenticatedEmail') || 'לא מאומת';
+
+            // 1. עדכון שדות בטאב 'מנהל'
+            const adminUsernameSetting = document.getElementById('adminUsernameSetting');
+            const adminProfileImageUrl = document.getElementById('adminProfileImageUrl');
+            const authenticatedEmailDisplay = document.getElementById('authenticatedEmailDisplay');
+
+            if (adminUsernameSetting) adminUsernameSetting.value = storedUsername || '';
+            if (adminProfileImageUrl) adminProfileImageUrl.value = storedProfileImageUrl;
+            if (authenticatedEmailDisplay) authenticatedEmailDisplay.textContent = email;
+
+
+            // 2. עדכון שדה ה-username הקריא-בלבד בטאב 'פרסום הודעה גלובלית'
+            const usernameInputReadOnly = document.getElementById('username');
+            if (usernameInputReadOnly) {
+                usernameInputReadOnly.value = storedUsername || 'חוק חיוך חובה';
+            }
+
+            // 3. עדכון שדה בטופס הכניסה (להצגה אם כבר נשמר)
+            if (document.getElementById('adminUsername')) {
+                document.getElementById('adminUsername').value = storedUsername || '';
+            }
+
+            // מחזיר את הנתונים לשימוש עתידי בשליחת הודעות
+            return { username: storedUsername, profileImageUrl: storedProfileImageUrl };
+        }
+
+        // --- פונקציית כניסה ל-Local Storage ---
+        function setLoggedInState(email) {
+            localStorage.setItem('adminIsLoggedIn', 'true');
+            localStorage.setItem('adminAuthenticatedEmail', email);
+        }
+
+        // --- פונקציית אתחול לאחר כניסה ---
+        function initializeAdminPanel() {
+            loadReportsCount();
+            loadAdminChatUnreadCount();
+            toggleMediaInput();
+            fetchUserCount();
+            loadAdminSettingsFromLocalStorage(); // NEW: טעינת ההגדרות החדשות
+            // פתיחת הטאב הראשון כברירת מחדל (שיהיה גלובלי)
+            document.getElementById('globalMessage').style.display = 'block';
+            document.querySelector('.tab-button:nth-child(3)').classList.add('active'); // הלחצן השלישי (גלובלי)
+        }
+
+        // --- פונקציית בדיקה לאחר קבלת נתוני גוגל (Callback) ---
+        function handleCredentialResponse(response) {
+            const loginMessage = document.getElementById('loginMessage');
+
+            // המרת ה-token לנתוני משתמש (JWT)
+            const token = response.credential;
+            // מכיוון שאנו ב-Frontend בלבד, אנו מפענחים את הטוקן באופן ישיר
+            const payload = JSON.parse(atob(token.split('.')[1]));
+
+            const userEmail = payload.email.toUpperCase();
+
+            // לוגיקת האימות של רשימת האימיילים
+            if (ALLOWED_EMAILS.includes(userEmail)) {
+                AUTHENTICATED_EMAIL = userEmail;
+                loginMessage.textContent = `אימייל אושר: ${userEmail}. אנא הזן שם משתמש כדי להמשיך.`;
+                loginMessage.className = 'success';
+                loginMessage.style.display = 'block';
+                // הפעלת כפתור הכניסה
+                document.getElementById('submitUsernameButton').removeAttribute('disabled');
+            } else {
+                AUTHENTICATED_EMAIL = null;
+                loginMessage.textContent = `כתובת האימייל ${userEmail} אינה מורשית להיכנס למערכת.`;
+                loginMessage.className = 'error';
+                loginMessage.style.display = 'block';
+                document.getElementById('submitUsernameButton').setAttribute('disabled', 'disabled');
+            }
+        }
+
+        // --- פונקציית טיפול בכניסה לאחר קבלת אישור גוגל ---
+        function submitUsername() {
+            const usernameInput = document.getElementById('adminUsername').value.trim();
+            const loginMessage = document.getElementById('loginMessage');
+
+            if (!AUTHENTICATED_EMAIL) {
+                loginMessage.textContent = 'אנא התחבר תחילה באמצעות גוגל.';
+                loginMessage.className = 'error';
+                loginMessage.style.display = 'block';
+                return;
+            }
+
+            if (!usernameInput) {
+                loginMessage.textContent = 'יש להזין שם משתמש.';
+                loginMessage.className = 'error';
+                loginMessage.style.display = 'block';
+                return;
+            }
+
+            // שמירת שם המשתמש והסטטוס
+            localStorage.setItem('adminUsername', usernameInput);
+            // NEW: שמור URL ריק כברירת מחדל אם לא קיים כבר
+            if (!localStorage.getItem('adminProfileImageUrl')) {
+                 localStorage.setItem('adminProfileImageUrl', '');
+            }
+            setLoggedInState(AUTHENTICATED_EMAIL);
+
+            // הסתרת מסך הכניסה והצגת הפאנל
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('adminPanelWrapper').style.display = 'flex';
+
+            // טעינת שם המשתמש והגדרות לכל השדות
+            loadAdminSettingsFromLocalStorage();
+
+            // אתחול ראשוני של המערכת לאחר כניסה
+            initializeAdminPanel();
+        }
+
+        // --- פונקציות עזר כלליות ---
+
+        function showResponse(message, isSuccess) {
+            const responseElement = document.getElementById('responseMessage');
+            responseElement.textContent = message;
+            responseElement.className = isSuccess ? 'success' : 'error';
+            responseElement.style.display = 'block';
+
+            setTimeout(() => {
+                responseElement.style.display = 'none';
+            }, 5000);
+        }
+
+        function openTab(evt, tabName) {
+            let i, tabcontent, tablinks;
+
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+
+            tablinks = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+
+            if (tabName === 'reports') {
+                loadReports();
+            } else if (tabName === 'adminChat') {
+                loadAdminChat().then(messages => {
+                    if (messages && messages.length > 0) {
+                        markAdminChatAsRead(messages);
+                    }
+                });
+            } else if (tabName === 'botControl') {
+                fetchBotStatus();
+            } else if (tabName === 'stats') {
+                fetchUserCount();
+            } else if (tabName === 'adminSettings') { // NEW: טעינת הנתונים בטאב הגדרות
+                 loadAdminSettingsFromLocalStorage();
+            }
+        }
+
+        function toggleMediaInput() {
+            const mediaType = document.getElementById('mediaType').value;
+            const fileUploadGroup = document.getElementById('fileUploadGroup');
+
+            if (mediaType === 'file') {
+                fileUploadGroup.style.display = 'block';
+                document.getElementById('file').setAttribute('required', 'required');
+            } else {
+                fileUploadGroup.style.display = 'none';
+                document.getElementById('file').removeAttribute('required');
+            }
+        }
+
+        async function fetchAndCacheAllMessages() {
+            if (globalMessagesCache.length > 0) return globalMessagesCache;
+
+            try {
+                const response = await fetch(`${API_URL}/get_all_global_messages`);
+                if (!response.ok) throw new Error('Failed to fetch messages');
+
+                globalMessagesCache = await response.json();
+                return globalMessagesCache;
+            } catch (error) {
+                console.error("שגיאה בטעינת כל ההודעות:", error);
+                return [];
+            }
+        }
+
+        // --- פונקציות ניהול דיווחים (ללא שינוי) ---
+
+        async function loadReportsCount() {
+            try {
+                const response = await fetch(`${API_URL}/reports_count`);
+                const data = await response.json();
+                document.getElementById('reportsCount').textContent = data.count;
+            } catch (error) {
+                console.error("שגיאה בטעינת מונה דיווחים:", error);
+                document.getElementById('reportsCount').textContent = 'שגיאה!';
+            }
+        }
+
+        function renderReports(reports, messageMap) {
+            REPORTS_LIST.innerHTML = '';
+
+            if (reports.length === 0) {
+                REPORTS_LIST.innerHTML = '<p class="no-data">אין דיווחים פתוחים.</p>';
+                return;
+            }
+
+            reports.forEach(report => {
+                const messageId = report.reportedMessageId || 'לא צוין';
+                const userId = report.userId;
+
+                const reportedMessage = messageMap[messageId];
+                let messageContentHtml = '';
+
+                if (reportedMessage) {
+                    // שינוי: התעלמות מהכותרת - שימוש רק בטקסט עצמו
+                    const text = reportedMessage.text || '[ללא תוכן טקסט]';
+                    const mediaLink = reportedMessage.mediaUrl ?
+                        `<a href="${reportedMessage.mediaUrl}" target="_blank" style="color: var(--primary-color); text-decoration: underline;">[צפה במדיה]</a>` :
+                        '[ללא קובץ]';
+
+                    messageContentHtml = `
+                        <div class="reported-message-details">
+                            <strong>תוכן ההודעה:</strong> <span style="font-style: italic;">"${text.substring(0, 100).trim()}${text.length > 100 ? '...' : ''}"</span><br>
+                            <strong>מדיה מצורפת:</strong> <span>${mediaLink}</span><br>
+                        </div>
+                    `;
+                } else {
+                    messageContentHtml = `<div class="reported-message-details"><strong>פרטי הודעה:</strong> <span>ההודעה המקורית נמחקה או לא נמצאה.</span></div>`;
+                }
+
+                const listItem = document.createElement('div');
+                listItem.className = 'report-item';
+                listItem.innerHTML = `
+                    <div class="report-header">
+                        <span class="report-id">מזהה דיווח (UserID): ${userId}</span>
+                        <span class="report-timestamp">${report.clientSendTime || report.server_received_time || 'לא ידוע'}</span>
+                    </div>
+                    <div class="report-content">
+                        <strong style="color: var(--error-color);">מזהה ההודעה שדווחה:</strong> <span style="font-weight: 700;">${messageId}</span>
+                        ${messageContentHtml}
+                        <br>
+                        <strong>סיבת הדיווח:</strong> <span>${report.reason}</span><br>
+                        ${report.reportDetails ? `<strong>פרטים נוספים מהמדווח:</strong> <span>${report.reportDetails}</span><br>` : ''}
+                    </div>
+                    <div class="report-actions">
+                        <button onclick="deleteReport('${userId}')" class="delete-button" title="מחיקת דיווח זה בלבד">
+                            <i class="fas fa-trash-alt"></i> מחק דיווח
+                        </button>
+                    </div>
+                `;
+                REPORTS_LIST.appendChild(listItem);
+            });
+        }
+
+        async function loadReports() {
+            REPORTS_LIST.innerHTML = '<p class="no-data">טוען דיווחים מהשרת...</p>';
+            try {
+                globalMessagesCache = [];
+                const allMessages = await fetchAndCacheAllMessages();
+
+                const messageMap = allMessages.reduce((map, msg) => {
+                    map[msg.id] = msg;
+                    return map;
+                }, {});
+
+                const response = await fetch(`${API_URL}/get_all_reports`);
+                if (!response.ok) throw new Error('Failed to fetch reports');
+                const reports = await response.json();
+
+                loadReportsCount();
+                renderReports(reports, messageMap);
+                showResponse('טעינת דיווחים מהשרת הסתיימה.', true);
+            } catch (error) {
+                console.error("שגיאה בטעינת דיווחים:", error);
+                showResponse('שגיאה בטעינת דיווחים מהשרת.', false);
+                REPORTS_LIST.innerHTML = '<p class="no-data error">שגיאה בטעינת הדיווחים מהשרת.</p>';
+                document.getElementById('reportsCount').textContent = 'שגיאה!';
+            }
+        }
+
+
+        async function deleteReport(userId) {
+            if (!confirm(`האם אתה בטוח שברצונך למחוק את הדיווח הקשור למשתמש ${userId}?`)) return;
+
+            try {
+                const response = await fetch(`${API_URL}/delete_report`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: userId })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showResponse(data.message, true);
+                    loadReports();
+                } else {
+                    showResponse(`שגיאה במחיקת דיווח: ${data.message || response.statusText}`, false);
+                }
+            } catch (error) {
+                console.error("שגיאה בבקשת מחיקת דיווח:", error);
+                showResponse('שגיאה בתקשורת עם השרת בעת מחיקת דיווח.', false);
+            }
+        }
+
+        async function clearAllReports() {
+            if (!confirm('האם אתה בטוח שברצונך למחוק את כל הדיווחים מהשרת? פעולה זו אינה הפיכה!')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/clear_all_reports`, {
+                    method: 'POST',
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showResponse(data.message, true);
+                    loadReports();
+                } else {
+                    showResponse(`שגיאה בניקוי דיווחים: ${data.message || response.statusText}`, false);
+                }
+            } catch (error) {
+                console.error("שגיאה בבקשת ניקוי דיווחים:", error);
+                showResponse('שגיאה בתקשורת עם השרת בעת ניקוי דיווחים.', false);
+            }
+        }
+
+        // --- פונקציות ניהול הודעות גלובליות (מעודכנות לשליחת profileImageUrl) ---
+
+        // UPDATE: הוספת profileImageUrl לשליחת הודעה גלובלית
+        document.getElementById('globalMessageForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const form = e.target;
+            const formData = new FormData(form);
+            const mediaType = document.getElementById('mediaType').value;
+            const { profileImageUrl } = loadAdminSettingsFromLocalStorage(); // NEW: טעינת URL
+
+            // שינוי: הוספת שדה "title" ל-FormData כאשר הוא שווה לטקסט
+            const text = document.getElementById('globalText').value;
+            formData.append('title', text);
+
+            // NEW: הוספת שדה תמונת הפרופיל של המנהל ל-FormData
+            formData.append('profileImageUrl', profileImageUrl);
+
+
+            try {
+                const response = await fetch(`${API_URL}/upload_media_and_write_message`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showResponse(data.message, true);
+                    form.reset();
+                    // שימוש בברירת המחדל מ-Local Storage / קבוע
+                    loadAdminSettingsFromLocalStorage(); // עדכון שדה השם הקריא-בלבד
+                    document.getElementById('mediaType').value = 'none';
+                    toggleMediaInput();
+                    globalMessagesCache = [];
+                    // איפוס מחדש של ה-textarea
+                    GLOBAL_TEXT_INPUT.value = '';
+                } else {
+                    showResponse(`שגיאה בפרסום הודעה: ${data.message}`, false);
+                }
+            } catch (error) {
+                console.error("שגיאה בשליחת הודעה:", error);
+                showResponse('שגיאה בתקשורת עם השרת.', false);
+            }
+        });
+
+        // --- פונקציות מונה הודעות לא נקראו (ללא שינוי) ---
+
+        /**
+         * מסמן את הודעות הצ'אט כנקראו על ידי שמירת ה-Timestamp של ההודעה האחרונה.
+         * @param {Array} messages - רשימת ההודעות (החדשה ביותר ראשונה).
+         */
+        function markAdminChatAsRead(messages) {
+            if (!messages || messages.length === 0) return;
+
+            // שימוש ב-Timestamp של ההודעה הכי חדשה
+            const newestTimestamp = new Date(messages[0].timestamp).getTime();
+
+            // עדכון הזמן ב-Local Storage
+            localStorage.setItem(ADMIN_CHAT_LAST_READ_KEY, newestTimestamp);
+
+            // עדכון מיידי של התגית (המונה אמור להתאפס)
+            loadAdminChatUnreadCount();
+        }
+
+        /**
+         * טוען את מונה ההודעות הלא נקראו ומעדכן את התגית בסרגל הצד.
+         */
+        async function loadAdminChatUnreadCount() {
+            // רענן רק אם המשתמש מחובר
+            if (localStorage.getItem('adminIsLoggedIn') !== 'true') return;
+
+            try {
+                // קבלת חותמת הזמן האחרונה שנקראה, או 0 אם לא קיימת
+                const lastReadTimestamp = localStorage.getItem(ADMIN_CHAT_LAST_READ_KEY) || 0;
+
+                // שליפת כל ההודעות (החדשה ביותר ראשונה)
+                const response = await fetch(`${API_URL}/get_admin_chat`);
+                if (!response.ok) throw new Error('Failed to fetch chat for count');
+                const messages = await response.json();
+
+                let unreadCount = 0;
+                // טעינת שם המשתמש העדכני
+                const localUsername = loadAdminSettingsFromLocalStorage().username.toLowerCase();
+
+                if (messages.length > 0) {
+                    for (const msg of messages) {
+                        const msgTimestamp = new Date(msg.timestamp).getTime();
+
+                        // הודעה נחשבת כ"לא נקראה" אם:
+                        // 1. ה-Timestamp שלה חדש יותר מהפעם האחרונה שקראנו.
+                        // 2. היא לא נשלחה על ידי המשתמש המקומי (כדי לא לספור הודעות שלי).
+                        if (msgTimestamp > lastReadTimestamp && (msg.username || '').toLowerCase() !== localUsername) {
+                            unreadCount++;
+                        } else {
+                            // אופטימיזציה: הרשימה ממוינת מהחדש לישן, ניתן לעצור כשמגיעים להודעה שנקראה.
+                            break;
+                        }
+                    }
+                }
+
+                if (unreadCount > 0) {
+                    ADMIN_CHAT_BADGE.textContent = unreadCount;
+                    ADMIN_CHAT_BADGE.style.display = 'inline';
+                } else {
+                    ADMIN_CHAT_BADGE.style.display = 'none';
+                }
+
+            } catch (error) {
+                console.error("שגיאה בטעינת מונה הודעות צ'אט:", error);
+                // במקרה של שגיאה, הסתר את התגית
+                if (ADMIN_CHAT_BADGE) ADMIN_CHAT_BADGE.style.display = 'none';
+            }
+        }
+
+        // --- סוף פונקציות מונה הודעות לא נקראו ---
+
+        // --- פונקציות צ'אט מנהלים (מעודכנות לשליחת profileImageUrl) ---
+
+        /**
+         * פונקציית רינדור צ'אט מנהלים מעודכנת - כל הודעה מציגה כותרת (שם ושעה).
+         */
+        function renderAdminChat(messages) {
+            CHAT_FEED.innerHTML = '';
+            const { username: localUsername } = loadAdminSettingsFromLocalStorage();
+
+            if (messages.length === 0) {
+                CHAT_FEED.innerHTML = '<p class="no-data">אין הודעות בצ\'אט המנהלים.</p>';
+                CHAT_FEED.scrollTop = CHAT_FEED.scrollHeight;
+                return;
+            }
+
+            // השרת שולח את ההודעות בסדר הפוך (החדש ביותר ראשון).
+            // יש לסדר אותן כרונולוגית (ישן קודם) להצגה.
+            const chronologicalMessages = [...messages].reverse();
+
+            chronologicalMessages.forEach(msg => {
+                const isSelf = (msg.username || '').toLowerCase() === localUsername.toLowerCase();
+                const currentTimestamp = new Date(msg.timestamp);
+
+                const containerDiv = document.createElement('div');
+                containerDiv.className = 'chat-message-container';
+                if (isSelf) {
+                    containerDiv.classList.add('self');
+                }
+
+                // בניית הכותרת (שם + שעה) - מוצגת תמיד
+                const headerDiv = document.createElement('div');
+                headerDiv.className = `chat-header ${isSelf ? 'self' : ''}`;
+                // פורמט שעה מקוצר: 14:30
+                const timeStr = currentTimestamp.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+                headerDiv.innerHTML = `
+                    <strong>${msg.username}</strong>
+                    <span>${timeStr}</span>
+                `;
+
+                // בניית בועת ההודעה
+                const messageBubble = document.createElement('div');
+                messageBubble.className = 'chat-message-bubble';
+                // מאפשר הצגת HTML (כמו <b>, <span class="colored-text">) בתוך ההודעה
+                messageBubble.innerHTML = msg.text;
+
+                // הוספת הכותרת תמיד (ביטול לוגיקת Stack)
+                containerDiv.appendChild(headerDiv);
+
+                containerDiv.appendChild(messageBubble);
+
+                CHAT_FEED.appendChild(containerDiv);
+            });
+
+            CHAT_FEED.scrollTop = CHAT_FEED.scrollHeight;
+        }
+
+        async function loadAdminChat() {
+            try {
+                const response = await fetch(`${API_URL}/get_admin_chat`);
+                const messages = await response.json();
+                // ה-messages שמגיעים מהשרת הפוכים (חדש ראשון)
+                renderAdminChat(messages);
+                return messages; // <--- NEW: החזרת רשימת ההודעות לשימוש ב-markAdminChatAsRead
+            } catch (error) {
+                console.error("שגיאה בטעינת צ'אט מנהלים:", error);
+                CHAT_FEED.innerHTML = '<p class="no-data error">שגיאה בטעינת הצ\'אט.</p>';
+                return []; // <--- NEW: החזרת רשימה ריקה במקרה של שגיאה
+            }
+        }
+
+        // UPDATE: הוספת profileImageUrl לשליחת הודעת צ'אט מנהלים
+        document.getElementById('adminChatForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const form = e.target;
+            const text = document.getElementById('chatText').value;
+            // שימוש בשם המשתמש וה-URL הטעונים
+            const { username, profileImageUrl } = loadAdminSettingsFromLocalStorage();
+
+            if (!text.trim()) return;
+
+            try {
+                const response = await fetch(`${API_URL}/write_admin_chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: username,
+                        text: text,
+                        profileImageUrl: profileImageUrl // NEW FIELD
+                    })
+                });
+
+                if (response.ok) {
+                    loadAdminChat();
+                    document.getElementById('chatText').value = '';
+                } else {
+                    showResponse('שגיאה בשליחת הודעת צ\'אט.', false);
+                }
+            } catch (error) {
+                console.error("שגיאה בשליחת הודעת צ'אט:", error);
+                showResponse('שגיאה בתקשורת עם השרת.', false);
+            }
+        });
+
+        // --- הוספת לוגיקה לשמירת הגדרות מנהל ---
+        document.getElementById('adminSettingsForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const newUsername = document.getElementById('adminUsernameSetting').value.trim();
+            const newProfileImageUrl = document.getElementById('adminProfileImageUrl').value.trim();
+            const statusElement = document.getElementById('adminSettingsStatus');
+
+            if (!newUsername) {
+                statusElement.textContent = 'שם המשתמש אינו יכול להיות ריק.';
+                statusElement.className = 'error';
+                statusElement.style.display = 'block';
+                return;
+            }
+
+            // שמירה ב-Local Storage
+            localStorage.setItem('adminUsername', newUsername);
+            localStorage.setItem('adminProfileImageUrl', newProfileImageUrl);
+
+            loadAdminSettingsFromLocalStorage(); // עדכון כל השדות ב-HTML
+
+            statusElement.textContent = 'ההגדרות נשמרו בהצלחה! שם משתמש וכתובת URL לתמונה עודכנו.';
+            statusElement.className = 'success';
+            statusElement.style.display = 'block';
+
+            setTimeout(() => {
+                statusElement.style.display = 'none';
+            }, 5000);
+        });
+
+
+        /**
+         * עוטף טקסט נבחר ב-textarea עם תג HTML (לדוגמה, <b> או <span class="colored-text">).
+         * @param {string} tag - התג לעטיפה ('b' או 'color').
+         * @param {string} textareaId - מזהה ה-textarea שבו מתבצעת הפעולה ('globalText' או 'chatText').
+         */
+        function wrapSelectionWithTag(tag, textareaId) {
+            const textarea = document.getElementById(textareaId);
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selectedText = textarea.value.substring(start, end);
+
+            let startTag = `<b>`;
+            let endTag = `</b>`;
+
+            // טיפול מיוחד בתג צבעוני
+            if (tag === 'color') {
+                startTag = `<span class="colored-text">`;
+                endTag = `</span>`;
+            }
+
+            // אם אין טקסט נבחר, הוסף את התגים למיקום הסמן
+            if (start === end) {
+                 const newText = textarea.value.substring(0, start) +
+                                 startTag + endTag +
+                                 textarea.value.substring(end);
+                 textarea.value = newText;
+                 // העבר את הסמן בין התגים החדשים
+                 textarea.selectionStart = textarea.selectionEnd = start + startTag.length;
+            } else {
+                 // עטוף את הטקסט הנבחר
+                 const newText = textarea.value.substring(0, start) +
+                                 startTag + selectedText + endTag +
+                                 textarea.value.substring(end);
+                 textarea.value = newText;
+                 // בחר את הטקסט החדש שנוצר (כולל התגים)
+                 textarea.selectionStart = start;
+                 textarea.selectionEnd = start + startTag.length + selectedText.length + endTag.length;
+            }
+            textarea.focus();
+        }
+
+
+        // --- פונקציות בקרת בוט (ללא שינוי, פרט לטעינת שם משתמש עדכני) ---
+
+        async function fetchBotStatus() {
+            try {
+                const response = await fetch(`${API_URL}/get_bot_status`);
+                const data = await response.json();
+
+                document.getElementById('pendingImagesCount').textContent = data.pendingCount || 0;
+                document.getElementById('currentInterval').textContent = `${data.intervalMinutes || 'N/A'} דקות`;
+
+                const statusSpan = document.getElementById('botCurrentStatus');
+                if (data.isRunning) {
+                    statusSpan.textContent = 'פעיל';
+                    statusSpan.style.color = 'var(--success-color)';
+                } else {
+                    statusSpan.textContent = 'לא פעיל';
+                    statusSpan.style.color = 'var(--error-color)';
+                }
+            } catch (error) {
+                console.error("שגיאה בטעינת סטטוס הבוט:", error);
+                document.getElementById('botCurrentStatus').textContent = 'שגיאה בטעינה';
+                document.getElementById('pendingImagesCount').textContent = 'שגיאה';
+                document.getElementById('currentInterval').textContent = 'שגיאה';
+            }
+        }
+
+        async function startBotSending() {
+            if (!confirm('האם אתה בטוח שברצונך להפעיל את שליחת הבוט?')) return;
+            try {
+                const response = await fetch(`${API_URL}/start_bot_sending`, { method: 'POST' });
+                const data = await response.json();
+                if (response.ok) {
+                    showResponse(data.message || 'הבוט הופעל בהצלחה.', true);
+                    fetchBotStatus();
+                } else {
+                    showResponse(`שגיאה בהפעלת בוט: ${data.message || response.statusText}`, false);
+                }
+            } catch (error) {
+                console.error("שגיאה בהפעלת שליחת בוט:", error);
+                showResponse('שגיאה בתקשורת עם השרת בעת הפעלת הבוט.', false);
+            }
+        }
+
+        async function stopBotSending() {
+            if (!confirm('האם אתה בטוח שברצונך להפסיק את שליחת הבוט?')) return;
+            try {
+                const response = await fetch(`${API_URL}/stop_bot_sending`, { method: 'POST' });
+                const data = await response.json();
+                if (response.ok) {
+                    showResponse(data.message || 'שליחת הבוט הופסקה.', true);
+                    fetchBotStatus();
+                } else {
+                    showResponse(`שגיאה בהפסקת בוט: ${data.message || response.statusText}`, false);
+                }
+            } catch (error) {
+                console.error("שגיאה בהפסקת שליחת בוט:", error);
+                showResponse('שגיאה בתקשורת עם השרת בעת עצירת הבוט.', false);
+            }
+        }
+
+        async function clearBotImages() {
+            if (!confirm('האם אתה בטוח שברצונך למחוק את כל התמונות הממתינות לשליחה על ידי הבוט?')) return;
+            try {
+                const response = await fetch(`${API_URL}/clear_bot_images`, { method: 'POST' });
+                const data = await response.json();
+                if (response.ok) {
+                    showResponse(data.message || 'כל התמונות הממתינות נמחקו.', true);
+                    fetchBotStatus();
+                } else {
+                    showResponse(`שגיאה במחיקת תמונות: ${data.message || response.statusText}`, false);
+                }
+            } catch (error) {
+                console.error("שגיאה בניקוי תמונות בוט:", error);
+                showResponse('שגיאה בתקשורת עם השרת בעת ניקוי תמונות.', false);
+            }
+        }
+
+        document.getElementById('botUploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const form = e.target;
+            const filesInput = document.getElementById('botFiles');
+            const intervalInput = document.getElementById('sendInterval');
+
+            if (filesInput.files.length === 0) {
+                showResponse('אנא בחר קבצים להעלאה.', false);
+                return;
+            }
+            if (filesInput.files.length > 100) {
+                showResponse('ניתן להעלות עד 100 קבצים בלבד.', false);
+                return;
+            }
+
+            const formData = new FormData();
+            for (let i = 0; i < filesInput.files.length; i++) {
+                // המפתח 'images' הוא הדרוש כדי לשלוח קבצים מרובים לשרת (מצריך לוגיקת שרת מתאימה)
+                formData.append('images', filesInput.files[i]);
+            }
+            // הוספת מרווח השליחה
+            formData.append('intervalMinutes', intervalInput.value);
+            // UPDATE: שימוש בשם המשתמש המוגדר כברירת מחדל
+            formData.append('username', loadAdminSettingsFromLocalStorage().username);
+
+
+            try {
+                showResponse(`מעלה ${filesInput.files.length} קבצים לשרת...`, true);
+                const response = await fetch(`${API_URL}/upload_bot_images`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showResponse(data.message || 'התמונות הועלו בהצלחה והוגדרו לשליחת בוט.', true);
+                    form.reset();
+                    fetchBotStatus();
+                } else {
+                    showResponse(`שגיאה בהעלאת תמונות: ${data.message || response.statusText}`, false);
+                }
+            } catch (error) {
+                console.error("שגיאה בשליחת תמונות לבוט:", error);
+                showResponse('שגיאה בתקשורת עם השרת.', false);
+            }
+        });
+
+        // --- פונקציות סטטיסטיקה (ללא שינוי) ---
+
+        async function fetchUserCount() {
+            try {
+                const response = await fetch(`${API_URL}/get_unique_user_count`);
+                const data = await response.json();
+                if (data.status === 'success') {
+                    UNIQUE_USER_COUNT_P.textContent = data.count;
+                } else {
+                    UNIQUE_USER_COUNT_P.textContent = 'שגיאה';
+                }
+            } catch (error) {
+                console.error("שגיאה בטעינת מונה משתמשים:", error);
+                UNIQUE_USER_COUNT_P.textContent = 'שגיאה';
+            }
+        }
+
+
+        /**
+         * פונקציה המאתחלת את כפתור Google Sign-In באמצעות מנגנון ניסיון חוזר (Polling).
+         * זאת על מנת להתגבר על מרוץ תנאים עם טעינת הסקריפט האסינכרוני.
+         */
+        function initGoogleSignIn() {
+            // אם האובייקט הגלובלי של גוגל (GSI) זמין
+            if (window.google) {
+                google.accounts.id.initialize({
+                    client_id: CLIENT_ID, // ה-Client ID שהתקבל
+                    callback: handleCredentialResponse, // פונקציה שתטפל בתגובה
+                    auto_select: false,
+                    cancel_on_tap_outside: true
+                });
+
+                // רינדור הכפתור לאחר האתחול המוצלח
+                google.accounts.id.renderButton(
+                    document.getElementById("google-sign-in-button"),
+                    { theme: "outline", size: "large", type: "standard", text: "signin_with" }
+                );
+            } else {
+                // אם הספרייה עדיין לא נטענה, נסה שוב בעוד 100 מילישניות
+                setTimeout(initGoogleSignIn, 100);
+            }
+        }
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // טעינת שם המשתמש והגדרות מ-Local Storage והכנה
+            loadAdminSettingsFromLocalStorage();
+
+            // קריאה לפונקציה החדשה שמטפלת בטעינה האסינכרונית של כפתור גוגל (פתרון ה-Race Condition)
+            initGoogleSignIn();
+
+
+            // בדיקת סטטוס כניסה ב-Local Storage
+            const isLoggedIn = localStorage.getItem('adminIsLoggedIn');
+            const storedEmail = localStorage.getItem('adminAuthenticatedEmail');
+
+            // בדיקה אם האימייל המאוחסן הוא אחד מהאימיילים המורשים
+            const isStoredEmailAllowed = storedEmail && ALLOWED_EMAILS.includes(storedEmail.toUpperCase());
+
+            if (isLoggedIn === 'true' && isStoredEmailAllowed) {
+                // אם המשתמש כבר מחובר עם האימייל הנכון, הצג את הפאנל ישירות
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('adminPanelWrapper').style.display = 'flex';
+                initializeAdminPanel();
+            } else {
+                // אחרת, הצג את מסך הכניסה
+                document.getElementById('loginScreen').style.display = 'flex';
+                document.getElementById('adminPanelWrapper').style.display = 'none';
+            }
+
+        });
+
+        // רענון אוטומטי של צ'אט מנהלים, בקרת בוט ומונה דיווחים כל 10 שניות
+        setInterval(() => {
+            // רענן רק אם המשתמש מחובר
+            if (localStorage.getItem('adminIsLoggedIn') === 'true') {
+                // טעינת מונה ההודעות הלא נקראו תמיד
+                loadAdminChatUnreadCount();
+
+                // טעינת הצ'אט המלא רק אם הטאב פתוח
+                if (document.getElementById('adminChat').style.display === 'block') {
+                    loadAdminChat();
+                    // אין צורך ב-markAdminChatAsRead כאן, מכיוון שהפעולה מבוצעת בלחיצה על הטאב
+                }
+
+                if (document.getElementById('botControl').style.display === 'block') { // בדיקה אם טאב הבוט פתוח
+                    fetchBotStatus();
+                }
+                loadReportsCount();
+            }
+        }, 10000);
+
+        // רענון מונה משתמשים כל 30 שניות
+        setInterval(() => {
+            if (localStorage.getItem('adminIsLoggedIn') === 'true') {
+                 fetchUserCount();
+            }
+        }, 30000);
+    </script>
+
+</body>
+</html>----
+
